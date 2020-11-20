@@ -15,8 +15,6 @@ module.exports.policies = {
    * (`true` allows public access)                                            *
    *                                                                          *
    ***************************************************************************/
-
   // '*': true,
-
-  'Article/*': 'getUserFromToken' //apply this policy to all actions inside Article
+  //'Article/*': 'getUserFromToken' //apply this policy to all actions inside Article
 };

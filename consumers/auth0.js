@@ -20,7 +20,13 @@ async function _deleteUser(token, id) {
     },
     json: true
   };
-  const data = await request(options);
+
+  try {
+    const data = await request(options);
+  } catch (err) {
+    console.log(err);
+  }
+
   if (data.statusCode !== 204) {
     throw 'Unable to delete user';
   }
@@ -43,7 +49,13 @@ async function _getApiToken() {
     },
     json: true
   };
-  const { body: data } = await request(options);
+
+  try {
+    const { body: data } = await request(options);
+  } catch (err) {
+    console.log(err);
+  }
+
   if (data && data.access_token) {
     return data.access_token;
   }
@@ -65,7 +77,13 @@ module.exports = {
       },
       json: true
     };
-    let data = await request(options);
+
+    try {
+      let data = await request(options);
+    } catch (err) {
+      console.log(err);
+    }
+
     if (data.statusCode == 401) {
       throw 'UnAuthorized User';
     }
@@ -95,7 +113,13 @@ module.exports = {
       },
       json: true
     };
-    const { body: data } = await request(options);
+
+    try {
+      const { body: data } = await request(options);
+    } catch (err) {
+      console.log(err);
+    }
+
     if (data.error) {
       throw data;
     }
@@ -108,90 +132,101 @@ module.exports = {
    * @param  {string} password - password of user.
    */
   createUser: async function(email, password) {
-    const token = await _getApiToken();
-    const options = {
-      method: 'POST',
-      url: `${config.baseUrl}/api/v2/users`,
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${token}`
-      },
-      body: {
-        email,
-        password,
-        connection: config.connection
-      },
-      json: true
-    };
-    const { body: data } = await request(options);
-    if (data.error) {
-      throw data;
-    }
-    return {
-      id: data.user_id,
-      deleteUser: _deleteUser.bind(null, token) // provide delete function in user object to delete in case of server error
-    };
-  },
-  resetPassword: async function(email, newPassword) {
-    const token = await _getApiToken();
-
-    const userIdReq = {
-      method: 'GET',
-      url: `${config.baseUrl}/api/v2/users-by-email?fields=user_id,created_at&include_fields=true&email=${email}`,
-
-      headers: {
-        'content-type': 'application/json',
-        authorization: `Bearer ${token}`
-      },
-      json: true
-    };
-    let data = await request(userIdReq);
-    console.log(`status for getting use id:${data.statusCode}`);
-
-    if (data.statusCode == 401) {
-      console.log('unauthorized user');
-      throw 'UnAuthorized User';
-    } else {
-      //DOES NOT WORK BECAUSE WE DO NOT HAVE PERSMISSION FROM USER TO DO THIS WITH THIS SCOPE LEVEL.
-      if (data.body.length < 1) {
-        console.log('no body returned by users-by-email');
-        throw 'No user found';
-        return data.body;
-      }
-
-      let uid = data.body[0].user_id;
-      console.log(`uid: ${uid}`);
-
-      if (!uid) {
-        throw 'user id field not found';
-        return `no uid, body: ${data.body}`;
-      }
-      var t2 = await _getApiToken();
-
+    try {
+      const token = await _getApiToken();
       const options = {
-        method: 'PATCH',
-        url: `${config.baseUrl}/api/v2/users/${uid}}`,
-        // url: `https://acciyo.auth0.com/api/v2/users/${uid}`,
+        method: 'POST',
+        url: `${config.baseUrl}/api/v2/users`,
         headers: {
           'content-type': 'application/json',
-          authorization: `Bearer ${t2}`
+          authorization: `Bearer ${token}`
         },
         body: {
-          password: newPassword,
-          scope: 'update:users',
+          email,
+          password,
           connection: config.connection
         },
         json: true
       };
 
-      const response = await request(options);
-      console.log(`status for setting user : ${response.statusCode}`);
-
-      console.log(response.body);
-      if (response.error) {
-        throw response;
+      try {
+        const { body: data } = await request(options);
+      } catch (err) {
+        console.log(err);
       }
-      return response.body;
+
+      if (data.error) {
+        throw data;
+      }
+      return {
+        id: data.user_id,
+        deleteUser: _deleteUser.bind(null, token) // provide delete function in user object to delete in case of server error
+      };
+    } catch (err) {
+      console.log(err);
+      return {};
     }
   }
+  // resetPassword: async function(email, newPassword) {
+  //   const token = await _getApiToken();
+
+  //   const userIdReq = {
+  //     method: 'GET',
+  //     url: `${config.baseUrl}/api/v2/users-by-email?fields=user_id,created_at&include_fields=true&email=${email}`,
+
+  //     headers: {
+  //       'content-type': 'application/json',
+  //       authorization: `Bearer ${token}`
+  //     },
+  //     json: true
+  //   };
+  //   let data = await request(userIdReq);
+  //   console.log(`status for getting use id:${data.statusCode}`);
+
+  //   if (data.statusCode == 401) {
+  //     console.log('unauthorized user');
+  //     throw 'UnAuthorized User';
+  //   } else {
+  //     //DOES NOT WORK BECAUSE WE DO NOT HAVE PERSMISSION FROM USER TO DO THIS WITH THIS SCOPE LEVEL.
+  //     if (data.body.length < 1) {
+  //       console.log('no body returned by users-by-email');
+  //       throw 'No user found';
+  //       return data.body;
+  //     }
+
+  //     let uid = data.body[0].user_id;
+  //     console.log(`uid: ${uid}`);
+
+  //     if (!uid) {
+  //       throw 'user id field not found';
+  //       return `no uid, body: ${data.body}`;
+  //     }
+  //     var t2 = await _getApiToken();
+
+  //     const options = {
+  //       method: 'PATCH',
+  //       url: `${config.baseUrl}/api/v2/users/${uid}}`,
+  //       // url: `https://acciyo.auth0.com/api/v2/users/${uid}`,
+  //       headers: {
+  //         'content-type': 'application/json',
+  //         authorization: `Bearer ${t2}`
+  //       },
+  //       body: {
+  //         password: newPassword,
+  //         scope: 'update:users',
+  //         connection: config.connection
+  //       },
+  //       json: true
+  //     };
+
+  //     const response = await request(options);
+  //     console.log(`status for setting user : ${response.statusCode}`);
+
+  //     console.log(response.body);
+  //     if (response.error) {
+  //       throw response;
+  //     }
+  //     return response.body;
+  //   }
+  // }
 };
