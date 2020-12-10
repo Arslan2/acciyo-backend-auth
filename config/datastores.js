@@ -12,12 +12,21 @@
  * For more information on configuring datastores, check out:
  * https://sailsjs.com/config/datastores
  */
+
 // const { DB_HOST, DB_NAME, DB_USERNAME, DB_PASSWORD, DB_PORT } = process.env;
-const DB_HOST = 'acciyo-prod.czfr9xpcpcx7.us-east-1.rds.amazonaws.com';
+// const DB_HOST = 'acciyo-prod.czfr9xpcpcx7.us-east-1.rds.amazonaws.com';
+// const DB_NAME = 'acciyo';
+// const DB_USERNAME = 'acciyomaster';
+// const DB_PASSWORD = 'zYPKOsANwz56';
+// const DB_PORT = 5432;
+
+// const { DB_HOST, DB_NAME, DB_USERNAME, DB_PASSWORD, DB_PORT } = process.env;
+const DB_HOST = '35.223.116.17';
 const DB_NAME = 'acciyo';
 const DB_USERNAME = 'acciyomaster';
 const DB_PASSWORD = 'zYPKOsANwz56';
 const DB_PORT = 5432;
+
 module.exports.datastores = {
   /***************************************************************************
    *                                                                          *
